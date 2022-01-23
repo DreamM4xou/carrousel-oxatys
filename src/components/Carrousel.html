@@ -1,0 +1,123 @@
+<div class="my-carrousel" :id=id>
+    <div class="row">
+        <div class="col-12">
+            <div class='container-my-carrousel'>
+                <h5>{{carrousel.nom}}</h5>
+                <div class='my-carrousel-images' v-if="!states.show_parameters">
+
+                    <button v-if="states.can_configure"
+                        class="btn my-carrousel-parameter-button"
+                        @click="openParameters()"
+                        title="Paramètre">
+                        <span class="bi bi-gear-fill"></span>
+                    </button>
+
+                    <div v-if="!carrousel.images || carrousel.images.length === 0">
+                        <div class="my-carrousel-image"
+                            :style="{height: carrousel.height + 'px'}">
+                            <img :src="default_image.url" :alt="default_image.text_alt"/>
+                        </div>
+                        <div class="my-carrousel-text">{{default_image.text_alt}}</div>
+                    </div>
+
+                    <div v-else>
+                        <div class="my-carrousel-image"
+                            v-for="(img, i) in carrousel.images"
+                            :style="{height: carrousel.height + 'px'}"
+                            v-show="states.selected === i">
+                            <img :src="img.url" :alt="img.text_alt">
+                            <div class="my-carrousel-text">{{img.text_alt}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="my-carrousel-thumbnails" v-if="!states.show_parameters">
+                    <button class="btn" @click="clickArrow('start')"
+                        :disabled="disableArrow('start')"
+                        v-show="showArrow('start')">
+                        <span class="bi bi-arrow-left-square-fill"></span>
+                    </button>
+                    <div class="my-carrousel-thumbnails-image"
+                        v-for="img in carrousel.images">
+                        <img :src="img.url" :alt="img.text_alt">
+                    </div>
+                    <button class="btn"
+                        @click="clickArrow('end')"
+                        :disabled="disableArrow('end')"
+                        v-show="showArrow('end')">
+                        <span class="bi bi-arrow-right-square-fill"></span>
+                    </button>
+                </div>
+                <div class="my-carrousel-parameters" v-if="states.show_parameters">
+                    <button class="btn-close float-end" @click="cancel"></button>
+                    <div class="row">
+
+                        <div class="col-6">
+                            <label :for="'form-height-' + id" class="form-label">
+                                Hauteur
+                            </label>
+                            <input type="text"
+                                class="form-control"
+                                :id="'form-height-' + id"
+                                placeholder="250"
+                                v-model="states.parameters.height"/>
+                            <div class="form-text">
+                                Hauteur d'affichage du carrousel en pixel
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <label :for="'form-thumbnails-' + id" class="form-label">
+                                Nombre de vignettes
+                            </label>
+                            <input type="number"
+                                class="form-control"
+                                :id="'form-thumbnails-' + id"
+                                placeholder="4"
+                                v-model="states.parameters.thumbnails_num"/>
+                        </div>
+                        <div class="col-6">
+                            <label :for="'form-scroll-' + id" class="form-label">
+                                Bouton de défilement
+                            </label>
+                            <select class="form-select"
+                                :id="'form-scroll-' + id"
+                                v-model="states.parameters.ending_scroll">
+                                <option v-for="opt in states.end_scroll" :value=opt.value>
+                                    {{opt.text}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-6">
+                            <button class="btn btn-success" @click=addImage
+                                :disabled="states.parameters.images.length >= 7">
+                                 <span class="bi bi-plus-circle-fill"></span>
+                                 Ajouter une image
+                             </button>
+                        </div>
+
+                        <div class="col-3" v-for="(image, index) in states.parameters.images">
+                            <img :src="image.url" :alt="image.text_alt">
+                            <label :for="'form-image-' + id + index" class="form-label">
+                                Description de l'image
+                            </label>
+                            <input type="text"
+                                class="form-control"
+                                :id="'form-image-' + id + index"
+                                placeholder="Description"
+                                v-model="image.text_alt"/>
+
+                        </div>
+
+                        <div class="col-12">
+                            <div class="float-start">
+                                <button class="btn btn-success" @click="save" :disabled="!formValid">Sauvegarder</button>
+                                <button class="btn btn-secondary" @click="cancel">Annuler</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

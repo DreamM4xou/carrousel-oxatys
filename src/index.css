@@ -4,3 +4,53 @@ body {
 #app {
     margin-top: 10px;
 }
+
+.btn {
+    margin: 5px;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.my-carrousel-images {
+    border: 1px solid black;
+    position: relative;
+    text-align: center;
+}
+.my-carrousel-image {
+    overflow: hidden;
+}
+.my-carrousel-image img{
+    max-height: 100%;
+}
+.my-carrousel-text {
+    position: absolute;
+    bottom: 0px;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 5px 10px;
+    width: 100%;
+}
+
+.my-carrousel-thumbnails {
+    padding-top: 5px;
+    text-align: center;
+}
+.my-carrousel-thumbnails-image {
+     display: inline-block;
+}
+.my-carrousel-thumbnails-image img {
+     max-height: 64px;
+     max-width: 64px;
+     display: inline-block;
+}
+
+.my-carrousel-parameter-button, .my-carrousel-parameters.btn-close {
+    position: absolute;
+    right: 0px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin: 5px;
+    background-color: rgba(255, 255, 255, 0.5);
+}
