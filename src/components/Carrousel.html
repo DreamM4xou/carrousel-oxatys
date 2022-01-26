@@ -25,7 +25,8 @@
                     <div v-else>
                         <div class="my-carrousel-image"
                             :style="{height: carrousel.height + 'px'}"
-                             :set="img = carrousel.images[states.selected]">
+                            v-for="(img, index) in carrousel.images"
+                            v-show="index === states.selected">
                             <img :src="img.url" :alt="img.text_alt">
                             <div class="my-carrousel-text" v-if="img.text_alt">{{img.text_alt}}</div>
                         </div>
