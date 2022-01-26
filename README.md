@@ -1,4 +1,4 @@
-# carrousel-oxatys
+# carrousel-oxatis
 
 - node.js v16 required
 - npm v7 required
