@@ -3,6 +3,8 @@
         <div class="col-12">
             <div class='container-my-carrousel'>
                 <h5>{{carrousel.nom}}</h5>
+
+                <!-- Carrousel images -->
                 <div class='my-carrousel-images' v-if="!states.show_parameters">
 
                     <button v-if="states.can_configure"
@@ -22,31 +24,41 @@
 
                     <div v-else>
                         <div class="my-carrousel-image"
-                            v-for="(img, i) in carrousel.images"
                             :style="{height: carrousel.height + 'px'}"
-                            v-show="states.selected === i">
+                             :set="img = carrousel.images[states.selected]">
                             <img :src="img.url" :alt="img.text_alt">
-                            <div class="my-carrousel-text">{{img.text_alt}}</div>
+                            <div class="my-carrousel-text" v-if="img.text_alt">{{img.text_alt}}</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Carrousel vignettes -->
                 <div class="my-carrousel-thumbnails" v-if="!states.show_parameters">
-                    <button class="btn" @click="clickArrow('start')"
-                        :disabled="disableArrow('start')"
-                        v-show="showArrow('start')">
+                    <button class="btn" @click="clickArrow('previous')"
+                        :disabled="disableArrow('previous')"
+                        v-show="showArrow('previous')">
                         <span class="bi bi-arrow-left-square-fill"></span>
                     </button>
                     <div class="my-carrousel-thumbnails-image"
-                        v-for="img in carrousel.images">
-                        <img :src="img.url" :alt="img.text_alt">
+                        v-for="(img, index) in carrousel.images"
+                        v-show="isInThumbnails(index)" >
+                        <div class="container-img">
+                            <img :src="img.url"
+                                :alt="img.text_alt"
+                                :class="{selected: index === states.selected}"
+                                @click="states.selected = index">
+                        </div>
                     </div>
                     <button class="btn"
-                        @click="clickArrow('end')"
-                        :disabled="disableArrow('end')"
-                        v-show="showArrow('end')">
+                        @click="clickArrow('next')"
+                        :disabled="disableArrow('next')"
+                        v-show="showArrow('next')">
                         <span class="bi bi-arrow-right-square-fill"></span>
                     </button>
                 </div>
+
+
+                <!-- Paramètres -->
                 <div class="my-carrousel-parameters" v-if="states.show_parameters">
                     <button class="btn-close float-end" @click="cancel"></button>
                     <div class="row">
@@ -97,7 +109,10 @@
                         </div>
 
                         <div class="col-3" v-for="(image, index) in states.parameters.images">
-                            <img :src="image.url" :alt="image.text_alt">
+                            <div class="container-img">
+                                <img :src="image.url" :alt="image.text_alt">
+
+                            </div>
                             <label :for="'form-image-' + id + index" class="form-label">
                                 Description de l'image
                             </label>
@@ -109,6 +124,11 @@
 
                         </div>
 
+                        <div class="col-12" v-if="states.error">
+                            <div class="alert alert-danger">
+                                {{states.error}}
+                            </div>
+                        </div>
                         <div class="col-12">
                             <div class="float-start">
                                 <button class="btn btn-success" @click="save" :disabled="!formValid">Sauvegarder</button>

@@ -18,9 +18,11 @@ export default {
     data() {
         return {
             states: {
-                selected: 0,
                 can_configure: this.is_admin,
+                selected: 0,
+                thumbnails_start: 0,
                 show_parameters: false,
+                error: null,
                 file_enabled: ['image/jpg', 'image/jpeg', 'image/png'],
                 end_scroll: [
                     {
@@ -49,51 +51,58 @@ export default {
         selector() {
             return ".container-my-carrousel#" + this.id;
         },
+        /**
+         * verify all fields au form and trigger an error
+         *
+         * @access public
+         * @return {Boolean} form failed
+         */
         formValid() {
             if (!this.states.can_configure) return false;
             let p = this.states.parameters;
+            this.states.error = "Choix du scroll non défini";
             if (!p.ending_scroll) return false;
+            this.states.error = "Taille non définie";
             if (!p.height) return false;
             if (typeof p.height !== 'number' &&
-                !Number.isNaN(parseInt(p.height, 10)))
+                Number.isNaN(parseInt(p.height, 10)))
                 return false;
+            this.states.error = "Nombre de vignette non défini";
             if (!p.thumbnails_num) return false;
             if (typeof p.thumbnails_num !== 'number' &&
-                !Number.isNaN(parseInt(p.thumbnails_num, 10)))
+                Number.isNaN(parseInt(p.thumbnails_num, 10)))
                 return false;
+            this.states.error = "Fichier non conforme";
             let file_ok = this.checkFiles(p.images_upload);
             if (!file_ok) return false;
+            this.states.error = null;
             return true;
         },
         selectedIsFirst() {
-            this.states.selected === 0;
+            return this.states.selected === 0;
         },
         selectedIsLast() {
-            this.states.selected === this.carrousel.images.length - 1 ;
+            return this.states.selected === this.carrousel.images.length - 1 ;
         }
     },
     created() {
         this.setCarrousel();
-        // this.listeners();
     },
     methods: {
+        /**
+         * Get object carrousel with id <id>
+         * @access public
+         */
         setCarrousel() {
             this.carrousel = this.$store.getters.getCarrouselById(this.id);
         },
-        listeners() {
-            function readURL(input) {
-                if (input.files && input.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        $('#test').attr('src', e.target.result);
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
-            $("#file-form-" + this.id).change(function() {
-                readURL(this);
-            })
-        },
+
+        // Carrousel parameters
+
+        /**
+         * Open the carrousel parameters
+         * @access public
+         */
         openParameters() {
             // this.states.parameters = this.carrousel;
             this.states.parameters = _.cloneDeep(this.carrousel);
@@ -103,15 +112,12 @@ export default {
         toggleShowParameters() {
             this.states.show_parameters = !this.states.show_parameters;
         },
-        getBackgroundColor() {
-            let values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f'];
-            let color = '#';
-            while (color.length < 7) {
-                let i = _.random(15);
-                color += values[i];
-            }
-            return color;
-        },
+        /**
+         * Check if the file has an enable type (image)
+         * @access public
+         * @param {Object} files file object construct with <File> type of an input file element
+         * @return {Boolean} type is accepted
+         */
         checkFiles(files) {
             let file_ok = true;
             _.forEach(files, i => {
@@ -138,32 +144,85 @@ export default {
             let url = `/images/carrousel (${i}).jpg`;
             this.states.parameters.images.push({url, text_alt: ''});
         },
+
+        // Carrousel thumbnails
+        /**
+         * depending the arrow, options and where is the selector, say if the arrow is disabled or not
+         *
+         * @access public
+         * @param {String} arrow "previous" or "next"
+         * @return {Boolean} the arrow is disabled or not
+         */
         disableArrow(arrow) {
             if (this.carrousel.ending_scroll === 'disabled') {
-                if (arrow === 'start' && this.selectedIsFirst) return true;
-                else if (arrow === 'end' &&  this.selectedIsLast) return true;
+                if (arrow === 'previous' && this.selectedIsFirst) return true;
+                else if (arrow === 'next' &&  this.selectedIsLast) return true;
             }
             return false;
         },
+        /**
+         * depending the arrow, options and where is the selector, say if the arrow is visible or not
+         *
+         * @access public
+         * @param {String} arrow "previous" or "next"
+         * @return {Boolean} the arrow is shown or not
+         */
         showArrow(arrow) {
             if (this.carrousel.ending_scroll === 'hidden') {
-                if (arrow === 'start' && this.selectedIsFirst) return false;
-                else if (arrow === 'end' &&  this.selectedIsLast) return false;
+                if (arrow === 'previous' && this.selectedIsFirst) return false;
+                else if (arrow === 'next' &&  this.selectedIsLast) return false;
             }
             return true;
         },
+        /**
+         * depending the arrow, options and where is the selector, affect the new selector index
+         *
+         * @access public
+         * @param {String} arrow "previous" or "next"
+         */
         clickArrow(arrow) {
-            if (arrow === 'start') {
+            if (arrow === 'previous') {
                 if (this.selectedIsFirst) {
                     if (this.carrousel.ending_scroll === 'infinite')
-                        this.states.selected = this.carrousel.images.length - 1;
-                } else this.states.selected--;
-            } else if (arrow === 'end') {
+                        this._affectSelectorToEnd();
+                } else this._affectToPrevious();
+            } else if (arrow === 'next') {
                 if (this.selectedIsLast) {
                     if (this.carrousel.ending_scroll === 'infinite')
-                        this.states.selected = 0;
-                } else this.states.selected++;
+                        this._affectSelectorToStart();
+                } else this._affectToNext();
             }
+        },
+        /**
+         * The image is in the thumbnails
+         *
+         * @access public
+         * @param {Number} index image index
+         * @return {Boolean} is in thumbnail
+         */
+        isInThumbnails(index) {
+            let start = this.states.thumbnails_start;
+            let end = start + this.carrousel.thumbnails_num;
+            return index >= start && index < end;
+        },
+        _affectSelectorToStart() {
+            this.states.selected = 0;
+            this.states.thumbnails_start = 0;
+        },
+        _affectSelectorToEnd() {
+            let end = this.carrousel.images.length;
+            this.states.selected = end - 1;
+            this.states.thumbnails_start = end - this.carrousel.thumbnails_num;
+        },
+        _affectToNext() {
+            this.states.selected++;
+            if (!this.isInThumbnails(this.states.selected))
+                this.states.thumbnails_start++;
+        },
+        _affectToPrevious() {
+            this.states.selected--;
+            if (!this.isInThumbnails(this.states.selected))
+                this.states.thumbnails_start--;
         }
     }
 }

@@ -1,3 +1,4 @@
+/* Global */
 body {
     background-color: #ebeff1;
 }
@@ -14,6 +15,7 @@ img {
     max-height: 100%;
 }
 
+/* carrousel images */
 .my-carrousel-images {
     border: 1px solid black;
     position: relative;
@@ -33,19 +35,30 @@ img {
     width: 100%;
 }
 
+/* Thumbnails */
 .my-carrousel-thumbnails {
     padding-top: 5px;
     text-align: center;
+    white-space: nowrap;
+    overflow: auto;
 }
 .my-carrousel-thumbnails-image {
      display: inline-block;
 }
-.my-carrousel-thumbnails-image img {
-     max-height: 64px;
-     max-width: 64px;
-     display: inline-block;
+.my-carrousel-thumbnails .container-img {
+    margin: 10px;
 }
+.my-carrousel-thumbnails-image img {
+     display: inline-block;
+     max-height: 96px;
+     max-width: 96px;
+     opacity: 70%;
+}
+.my-carrousel-thumbnails-image img.selected {
+    opacity: 100%;
+ }
 
+/* Parameters */
 .my-carrousel-parameter-button, .my-carrousel-parameters.btn-close {
     position: absolute;
     right: 0px;
@@ -53,4 +66,34 @@ img {
     border-radius: 5px;
     margin: 5px;
     background-color: rgba(255, 255, 255, 0.5);
+}
+
+.my-carrousel-parameters .container-img {
+    margin: 10px 0px;
+    width: 100%;
+    padding-top: 100%;
+    position: relative;
+}
+.my-carrousel-parameters .container-img img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+/* Animation */
+.my-carrousel-image img {
+  animation: linear infinite;
+  animation-name: change;
+  animation-duration: 0.2s;
+  animation-iteration-count: 1;
+}
+@keyframes change {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 100%;
+  }
 }
